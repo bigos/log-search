@@ -3,7 +3,7 @@ require 'pry'
 
 def log_load(fh)
   lines = fh.read.lines
-  binding.pry
+  # binding.pry
   puts   lines[0]
 
   prelude = []
@@ -12,10 +12,9 @@ def log_load(fh)
   li = 0
   parts = []
   lines.each do |l|
-
     # beginning of example
     if l[0,3] == '==='
-      if prelude.blank?
+      if prelude.empty?
         prelude << parts
       else
         examples << parts
@@ -27,6 +26,9 @@ def log_load(fh)
     end
     li += 1
   end
+  examples << parts
+
+  binding.pry
   [prelude, examples]
 end
 
