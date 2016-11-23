@@ -38,11 +38,26 @@ class LogData
   end
 
   def search(s)
-    @examples.each do |e|
+    puts "\n\nsearch results"
+    @examples[10..11].each do |e|
       found = []
       e.each do |el|
-        if el.index(s)
-          found << el
+        q1 = el.split("\e[0m").last.strip
+        q2 = el.split("\e[1m").last.split("[[").first.strip.split("\e[0m").first
+
+
+
+
+        query_part = q1
+        query_part = q2 if query_part.empty?
+        begin
+          if PgQuery.parse(query_part).tables.collect{|x| x.index(s)}.any?
+
+            found << el
+          end
+        rescue
+          puts el
+          # we are not interested in parsing errors
         end
       end
       if found.any?
@@ -53,7 +68,10 @@ class LogData
         end
       end
     end
-  end
+    puts "\n\n\n\n"
+
+
+  end # def
 end
 
 # ----------------------------------------------
@@ -71,7 +89,7 @@ def loader
     lg.log_load(fh)
     lg.search(table)
   else
-    puts "File #{path} does not exist"
+    print "File #{path} does not exist"
   end
 end
 
