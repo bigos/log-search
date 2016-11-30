@@ -28,19 +28,32 @@ class LogData
           @examples << parts
         end
         parts = []
-        parts << l
-      else
-        parts << l
       end
+      parts << l
       li += 1
     end
     @examples << parts
+  end
+
+  def split_on_esc(s)
+    s.split("\e")
+     .collect { |a| a.split(/\[\d+m/) }
+     .collect(&:last)
+     .reject(&:nil?)
+     .collect(&:strip)
+     .reject(&:empty?)
   end
 
   def search(s)
     @examples.each do |e|
       found = []
       e.each do |el|
+        begin
+          q1 = split_on_esc(el)
+        rescue
+        end
+        binding.pry
+
         if el.index(s)
           found << el
         end
