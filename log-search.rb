@@ -50,9 +50,17 @@ class LogData
       e.each do |el|
         begin
           q1 = split_on_esc(el)
+          q2 = q1[2]
+          ris = '[["'
+          if q2.rindex ris
+            q3 = q2[0..((q2.rindex ris) - 1)]
+          else
+            q3 = q2
+          end
+          tables = PgQuery.parse(q3).tables
         rescue
         end
-        binding.pry
+        binding.pry if el.index(']]')
 
         if el.index(s)
           found << el
