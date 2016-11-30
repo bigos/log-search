@@ -51,9 +51,9 @@ class LogData
         begin
           q1 = split_on_esc(el)
           q2 = q1[2]
-          ris = '[["'
+          ris = ' [["'
           if q2.rindex ris
-            q3 = q2[0..((q2.rindex ris) - 1)]
+            q3 = q2[0..((q2.rindex ris))]
           else
             q3 = q2
           end
