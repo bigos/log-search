@@ -1,6 +1,33 @@
 require 'pg_query'
 require 'pry'
 
+class SplitLogLine
+  attr_reader :q1, :q2, :q3, :tables
+  def initialize(s)
+    begin
+    @q1 = split_on_esc(s)
+    @q2 = @q1[2]
+
+    ris = ' [["'
+    query_end = @q2.rindex(ris) || -1
+    @q3 = @q2[0..query_end]
+    @tables = PgQuery.parse(@q3).tables
+    rescue
+    end
+  end
+
+  private
+
+  def split_on_esc(s)
+    s.split("\e")
+      .collect { |a| a.split(/\[\d+m/) }
+      .collect(&:last)
+      .reject(&:nil?)
+      .collect(&:strip)
+      .reject(&:empty?)
+  end
+end
+
 class LogData
   attr_reader :prelude, :examples
 
@@ -35,34 +62,13 @@ class LogData
     @examples << parts
   end
 
-  def split_on_esc(s)
-    s.split("\e")
-     .collect { |a| a.split(/\[\d+m/) }
-     .collect(&:last)
-     .reject(&:nil?)
-     .collect(&:strip)
-     .reject(&:empty?)
-  end
-
   def search(s)
     @examples.each do |e|
       found = []
       e.each do |el|
-        begin
-          q1 = split_on_esc(el)
-          q2 = q1[2]
-          ris = ' [["'
-          if q2.rindex ris
-            q3 = q2[0..((q2.rindex ris))]
-          else
-            q3 = q2
-          end
-          tables = PgQuery.parse(q3).tables
-        rescue
-        end
-        binding.pry if el.index(']]')
+        sl = SplitLogLine.new el
 
-        if el.index(s)
+        if sl.tables && sl.tables.collect { |x| x.index s }.any?
           found << el
         end
       end
