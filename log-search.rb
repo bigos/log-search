@@ -1,106 +1,71 @@
 require 'pg_query'
 require 'pry'
 
-class SplitLogLine
-  attr_reader :q1, :q2, :q3, :tables
-  def initialize(s)
-    begin
-    @q1 = split_on_esc(s)
-    @q2 = @q1[2]
+require './split_log_line.rb'
+require './log_data.rb'
 
-    ris = ' [["'
-    query_end = @q2.rindex(ris) || -1
-    @q3 = @q2[0..query_end]
-    @tables = PgQuery.parse(@q3).tables
-    rescue
+# the application takes input from the console and performs various searches in the log file
+class Application
+  attr_reader :log_data
+
+  def initialize(log_data)
+    @log_data = log_data
+  end
+
+  def help
+    help_string = <<-doc
+
+Quitting:
+  type exit
+
+Obtaining help:
+ type help or ?
+doc
+    puts help_string
+  end
+
+  def prompt_input(prompt)
+    puts prompt
+    STDIN.gets.strip
+  end
+
+  def ui_loop
+    prompt = "\n> "
+    help
+    loop do
+      puts prompt
+      input = STDIN.gets.strip
+      break if input == 'exit'
+
+      help if input == 'help' || input == '?'
     end
+    puts "\n exiting...\n"
   end
 
-  private
-
-  def split_on_esc(s)
-    s.split("\e")
-      .collect { |a| a.split(/\[\d+m/) }
-      .collect(&:last)
-      .reject(&:nil?)
-      .collect(&:strip)
-      .reject(&:empty?)
-  end
-end
-
-class LogData
-  attr_reader :prelude, :examples
-
-  def initialize
-    @prelude = []
-    @examples = []
-  end
-
-  def log_load(fh)
-    lines = fh.read.lines
-    # binding.pry
-    puts   lines[0]
-
-    @prelude = []
-    @examples = []
-
-    li = 0
-    parts = []
-    lines.each do |l|
-      # beginning of example
-      if l[0,3] == '==='
-        if prelude.empty?
-          @prelude << parts
-        else
-          @examples << parts
-        end
-        parts = []
-      end
-      parts << l
-      li += 1
-    end
-    @examples << parts
-  end
-
-  def search(s)
-    @examples.each do |e|
-      found = []
-      e.each do |el|
-        sl = SplitLogLine.new el
-
-        if sl.tables && sl.tables.collect { |x| x.index s }.any?
-          found << el
-        end
-      end
-      if found.any?
-        puts e[0]
-        puts e[1]
-        found.each do |l|
-          puts l
-        end
-      end
-    end
-  end
 end
 
 # ----------------------------------------------
+def arg_error(path, table)
+  return 'You forgot to give me a path to the log file' unless path
+  return "File #{path} does not exist" unless File.exist?(path)
+  return 'You forgot to give me a a table name' unless table
+  nil
+end
+
 def loader
   lg = LogData.new
   path = ARGV[0]
   table = ARGV[1]
-  if path.nil?
-    puts 'You forgot to give me a path to the log file'
-  elsif table.nil?
-    puts 'You forgot to give me a a table name'
-  elsif File.exist?(path)
-    puts "File exists, going to load it"
-    fh = File.open(path)
-    lg.log_load(fh)
-    lg.search(table)
-  else
-    puts "File #{path} does not exist"
-  end
-end
 
+  err = arg_error(path, table)
+  puts err
+  return if err
+
+  lg.log_load File.open(path)
+
+  app = Application.new(lg)
+  app.log_data.search(table)
+  app.ui_loop
+end
 
 loader
