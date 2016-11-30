@@ -10,6 +10,11 @@ class Application
 
   def initialize(log_data)
     @log_data = log_data
+    @prompt = ' > '
+    @commands = { 't' => :table_search,
+                  's' => :string_search }
+
+    ui_loop
   end
 
   def help
@@ -20,52 +25,62 @@ Quitting:
 
 Obtaining help:
  type help or ?
+
+Search:
+type t to search for queries affecting table t
+
+type s to search for log line containing string s
 doc
     puts help_string
   end
 
-  def prompt_input(prompt)
-    puts prompt
+  def prompt_input(prompt = '')
+    print prompt + @prompt
     STDIN.gets.strip
   end
 
+  def table_search
+    @log_data.search(:table, prompt_input('enter the part of table name to search for'))
+  end
+
+  def string_search
+    raise 'not implemented'
+  end
+
   def ui_loop
-    prompt = "\n> "
     help
     loop do
-      puts prompt
-      input = STDIN.gets.strip
+      input = prompt_input
       break if input == 'exit'
-
       help if input == 'help' || input == '?'
+
+      @commands.each do |k, v|
+        if input == k
+          send v
+          break
+        end
+      end # end of @commands loop
     end
     puts "\n exiting...\n"
   end
-
 end
 
 # ----------------------------------------------
-def arg_error(path, table)
+def arg_error(path)
   return 'You forgot to give me a path to the log file' unless path
   return "File #{path} does not exist" unless File.exist?(path)
-  return 'You forgot to give me a a table name' unless table
   nil
 end
 
 def loader
   lg = LogData.new
   path = ARGV[0]
-  table = ARGV[1]
-
-  err = arg_error(path, table)
+  err = arg_error path
   puts err
   return if err
 
   lg.log_load File.open(path)
-
-  app = Application.new(lg)
-  app.log_data.search(table)
-  app.ui_loop
+  Application.new(lg)
 end
 
 loader

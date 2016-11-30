@@ -32,15 +32,25 @@ class LogData
     @examples << parts
   end
 
-  def search(s)
+  def search_tables(el, s)
+    sl = SplitLogLine.new el
+
+    if sl.tables && sl.tables.collect { |x| x.index s }.any?
+      el
+    end
+  end
+
+  def search(op, s)
     @examples.each do |e|
       found = []
       e.each do |el|
-        sl = SplitLogLine.new el
-
-        if sl.tables && sl.tables.collect { |x| x.index s }.any?
-          found << el
+        if op == :table
+          # in future you can add more operations
+          f = search_tables(el, s)
+        else
+          raise 'unknown operation'
         end
+        found << f if f
       end
 
       if found.any?
@@ -52,4 +62,5 @@ class LogData
       end
     end
   end
+
 end
