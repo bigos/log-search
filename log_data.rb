@@ -37,7 +37,12 @@ class LogData
       found = []
       e.each do |el|
         $A += 1
-        binding.pry if $A > 1006
+        binding.pry if $A == 1007
+
+        query = SplitLogLine.new(el).q3
+        if query && query.index(s)
+          found << e
+        end
       end
 
       if found.any?
