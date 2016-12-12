@@ -36,16 +36,16 @@ class LogData
     @examples.each do |e|
       found = []
       e.each do |el|
-        sl = SplitLogLine.new el
-
-        if sl.tables && sl.tables.collect { |x| x.index s }.any?
-          found << el
-        end
+        $A += 1
+        binding.pry if $A > 1006
       end
 
       if found.any?
+        binding.pry
+
         puts e[0]
         puts e[1]
+
         found.each do |l|
           puts l
         end

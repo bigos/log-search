@@ -37,7 +37,11 @@ doc
       input = STDIN.gets.strip
       break if input == 'exit'
 
-      help if input == 'help' || input == '?'
+      if input == 'help' || input == '?'
+        help
+      else
+        log_data.search input
+      end
     end
     puts "\n exiting...\n"
   end
@@ -45,10 +49,9 @@ doc
 end
 
 # ----------------------------------------------
-def arg_error(path, table)
+def arg_error(path)
   return 'You forgot to give me a path to the log file' unless path
   return "File #{path} does not exist" unless File.exist?(path)
-  return 'You forgot to give me a a table name' unless table
   nil
 end
 
@@ -57,15 +60,15 @@ def loader
   path = ARGV[0]
   table = ARGV[1]
 
-  err = arg_error(path, table)
+  err = arg_error path
   puts err
   return if err
 
   lg.log_load File.open(path)
 
   app = Application.new(lg)
-  app.log_data.search(table)
   app.ui_loop
 end
 
+$A = 0
 loader
