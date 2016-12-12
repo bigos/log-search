@@ -35,24 +35,26 @@ class LogData
   def search(s)
     @examples.each do |e|
       found = []
+      li = 0
       e.each do |el|
         $A += 1
-        binding.pry if $A == 1007
+        # binding.pry if $A == 1007
 
         query = SplitLogLine.new(el).q3
         if query && query.index(s)
-          found << e
+          found << [e, li]
         end
+        li += 1
       end
 
       if found.any?
-        binding.pry
 
         puts e[0]
-        puts e[1]
+        puts e[1].split('[]:').last
+        puts e[2].split('[]:').last
 
         found.each do |l|
-          puts l
+          puts l[0][l[1]]
         end
       end
     end

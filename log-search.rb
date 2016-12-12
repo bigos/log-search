@@ -18,10 +18,17 @@ class Application
 Quitting:
   type exit
 
+Search:
+  type s
+
 Obtaining help:
  type help or ?
 doc
     puts help_string
+  end
+
+  def search
+    log_data.search prompt_input 'Enter text you want to find'
   end
 
   def prompt_input(prompt)
@@ -30,18 +37,16 @@ doc
   end
 
   def ui_loop
-    prompt = "\n> "
+    prompt = " \nready > "
     help
     loop do
       puts prompt
       input = STDIN.gets.strip
       break if input == 'exit'
 
-      if input == 'help' || input == '?'
-        help
-      else
-        log_data.search input
-      end
+      help if input == 'help' || input == '?'
+      search if input == 's'
+
     end
     puts "\n exiting...\n"
   end
