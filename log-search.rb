@@ -69,7 +69,6 @@ end
 def loader
   lg = LogData.new
   path = ARGV[0]
-  table = ARGV[1]
 
   err = arg_error path
   puts err
