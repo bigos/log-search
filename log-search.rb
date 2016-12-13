@@ -19,7 +19,8 @@ Quitting:
   type exit
 
 Search:
-  type s
+  type s for text search
+  type t for table search
 
 Obtaining help:
  type help or ?
@@ -28,7 +29,11 @@ doc
   end
 
   def search
-    log_data.search prompt_input 'Enter text you want to find'
+    log_data.search prompt_input('Enter text you want to find'), :text
+  end
+
+  def table_search
+    log_data.search prompt_input('Enter table you want to find'), :table
   end
 
   def prompt_input(prompt)
@@ -46,6 +51,7 @@ doc
 
       help if input == 'help' || input == '?'
       search if input == 's'
+      table_search if input == 't'
 
     end
     puts "\n exiting...\n"
@@ -75,5 +81,4 @@ def loader
   app.ui_loop
 end
 
-$A = 0
 loader

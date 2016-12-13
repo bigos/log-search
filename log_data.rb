@@ -32,17 +32,21 @@ class LogData
     @examples << parts
   end
 
-  def search(s)
+  def search(s, type)
     @examples.each do |e|
       found = []
       li = 0
       e.each do |el|
-        $A += 1
-        # binding.pry if $A == 1007
-
         query = SplitLogLine.new(el).q3
-        if query && query.index(s)
-          found << [e, li]
+
+        if type == :table
+          if query && PgQuery.parse(query).tables.include?(s)
+            found << [e, li]
+          end
+        else # :text
+          if query && query.index(s)
+            found << [e, li]
+          end
         end
         li += 1
       end
@@ -54,7 +58,12 @@ class LogData
         puts e[2].split('[]:').last
 
         found.each do |l|
-          puts l[0][l[1]]
+          line = l[0][l[1]]
+          if line.index 'ALTER TABLE "schema_migrations"'
+            puts "migrations containing #{s} #{line[0, 120]}\e[m"
+          else
+            puts line
+          end
         end
       end
     end
