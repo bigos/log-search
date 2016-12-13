@@ -1,8 +1,10 @@
 * Search the Log File
 
-To list all your log lines with word subdomains do the following
+To list all your log lines do the following
 #+BEGIN_EXAMPLE
- ruby log-search.rb log/test.log subdomains
+ ruby log-search.rb log/test.log
 #+END_EXAMPLE
 
-I have ran into a problem with filtering queries out of the log line, so query search will be done later
+When the prompt shows typing ~help~ and pressing Enter will show available options.
+
+It is still work in progress and will most likely change.

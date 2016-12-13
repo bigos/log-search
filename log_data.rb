@@ -38,13 +38,14 @@ class LogData
       li = 0
       e.each do |el|
         query = SplitLogLine.new(el).q3
+        log_text = el.split('[]:')[1]
 
         if type == :table
           if query && PgQuery.parse(query).tables.include?(s)
             found << [e, li]
           end
         else # :text
-          if query && query.index(s)
+          if log_text && log_text.index(s)
             found << [e, li]
           end
         end
