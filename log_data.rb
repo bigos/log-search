@@ -41,8 +41,12 @@ class LogData
         log_text = el.split('[]:')[1]
 
         if type == :table
-          if query && PgQuery.parse(query).tables.include?(s)
-            found << [e, li]
+          begin
+            if query && PgQuery.parse(query).tables.include?(s)
+              found << [e, li]
+            end
+          rescue
+            # found << [e, li]
           end
         else # :text
           if log_text && log_text.index(s)
