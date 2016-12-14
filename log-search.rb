@@ -8,8 +8,9 @@ require './log_data.rb'
 class Application
   attr_reader :log_data
 
-  def initialize(log_data)
+  def initialize(log_data, log_path)
     @log_data = log_data
+    @log_path = log_path
   end
 
   def help
@@ -21,6 +22,7 @@ Quitting:
 Search:
   type s for text search
   type t for table search
+  type reload to reload the log
 
 Obtaining help:
  type help or ?
@@ -34,6 +36,10 @@ doc
 
   def table_search
     log_data.search prompt_input('Enter table you want to find'), :table
+  end
+
+  def reload_log
+    @log_data.log_load File.open @log_path
   end
 
   def prompt_input(prompt)
@@ -52,7 +58,7 @@ doc
       help if input == 'help' || input == '?'
       search if input == 's'
       table_search if input == 't'
-
+      reload_log if input == 'reload'
     end
     puts "\n exiting...\n"
   end
@@ -76,7 +82,7 @@ def loader
 
   lg.log_load File.open(path)
 
-  app = Application.new(lg)
+  app = Application.new(lg, path)
   app.ui_loop
 end
 
